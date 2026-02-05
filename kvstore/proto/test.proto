@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "github.com/wisccs739/madkv/p1/go/gen/kvpb;kvpb";
+option go_package = "madkv/kvstore/gen/kvpb;kvpb";
 
 service KV {
   rpc Ping(PingRequest) returns (PingReply);
