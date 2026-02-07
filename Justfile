@@ -26,13 +26,16 @@ fetch remote path:
     rsync -aP {{remote}}:~/madkv/{{path}} .
 
 # common utils recipes
-mod utils 'justmod/utils.just'
+# mod utils 'justmod/utils.just'
 
-# project 1 recipes
-mod p1 'justmod/proj1.just'
+#ping grpc server recipes
+mod ping 'ping.just'
 
-# project 2 recipes
-mod p2 'justmod/proj2.just'
+# # project 1 recipes
+# mod p1 'justmod/proj1.just'
 
-# project 3 recipes
-mod p3 'justmod/proj3.just'
+# # project 2 recipes
+# mod p2 'justmod/proj2.just'
+
+# # project 3 recipes
+# mod p3 'justmod/proj3.just'

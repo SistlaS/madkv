@@ -4,21 +4,41 @@ set working-directory := '..'
 default:
     @just --list p1 --unsorted
 
-# install extra dependencies of your KV code
 deps:
-    # FIXME: your dependency installation commands here
+    #!/usr/bin/env bash
+    cd kvstore
+    # Initialize go module if not exists
+    if [ ! -f go.mod ]; then
+        go mod init madkv/kvstore
+    fi
+    # Get dependencies
+    go get google.golang.org/grpc
+    go get google.golang.org/protobuf
+    go get github.com/google/btree
+    # Generate protobuf code
+    mkdir -p gen/kvpb
+    protoc --go_out=gen --go_opt=paths=source_relative \
+           --go-grpc_out=gen --go-grpc_opt=paths=source_relative \
+           proto/kvstore.proto
+    # Tidy up dependencies
+    go mod tidy
+    echo "*******Dependencies installed and protobuf code generated*******"
 
-# build your executables in release mode
+
 build:
-    # FIXME: your build commands here (don't include clean)
+    cd kvstore && mkdir -p bin
+    cd kvstore && go build -o bin/server ./server
+    cd kvstore && go build -o bin/client ./client
+    @echo "*******Built server and client binaries*******"
 
-# clean the build of your executables
 clean:
-    # FIXME: your clean commands here
+    rm -rf kvstore/bin
+    rm -rf kvstore/gen
+    @echo "*******Cleaned build artifacts*******"
 
 # run your KV store server
-server listen="0.0.0.0:3777":
-    # FIXME: your server run command here, listening on addr for new clients
+server listen_addr="127.0.0.1:50051":
+    cd kvstore && ./bin/server --listen {{listen_addr}}
 
 # run you KV store client in stdin/out interface mode
 client server="127.0.0.1:3777":

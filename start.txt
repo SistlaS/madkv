@@ -1,0 +1,4 @@
+just --unstable ping deps 
+just --unstable ping build
+just --unstable ping server 127.0.0.1:50051
+just --unstable ping client 127.0.0.1:50051
