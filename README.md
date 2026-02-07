@@ -427,5 +427,3 @@ Assume all keys and values are ASCII alphanumeric, case-sensitive strings. All k
 Authored by [Guanzhou Hu](https://josehu.com). First offered in CS 739 Spring 2025 taught by [Prof. Andrea Arpaci-Dusseau](https://pages.cs.wisc.edu/~dusseau/). To get the associated project specs and a reference solution in Rust for teaching purposes, please contact us!
 
 If you find replicated distributed systems interesting, take a look at [Summerset](https://github.com/josehu07/summerset) and [Linearize](https://github.com/josehu07/linearize) :-)
-
-test push
