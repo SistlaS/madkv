@@ -50,32 +50,58 @@ server listen_addr="127.0.0.1:50051":
     cd kvstore && ./bin/server --listen {{listen_addr}}
 
 # run you KV store client in stdin/out interface mode
-client server="127.0.0.1:3777":
+client server="127.0.0.1:50051":
     cd kvstore && ./bin/client --server {{server}}
 
 # run your KV store testcase 1 client
-test1 server="127.0.0.1:3777":
-    # FIXME: your testcase 1 client run command here
-    #        for testcases, feel free to reuse 'just p1::client' if you
-    #        designed your clients this way, or invoke different executables
+test1 server="127.0.0.1:50051":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd kvstore
+    ./bin/client --server "{{server}}" <<'EOF'
+    PUT a 1
+    PUT b 2
+    GET a
+    SWAP a 3
+    GET a
+    SCAN a z
+    DELETE b
+    GET b
+    STOP
+    EOF
 
 # run your KV store testcase 2 client
-test2 server="127.0.0.1:3777":
-    # FIXME: your testcase 2 client run command here
+test2 server="127.0.0.1:50051":
+    #!/usr/bin/env bash
+    set -euo pipefail
+    cd kvstore
+    ./bin/client --server "{{server}}" <<'EOF'
+    PUT x 9
+    GET y
+    SWAP y 1
+    DELETE y
+    SCAN z zz
+    DELETE x
+    PUT k 
+    GET 
+    SCAN
+    STOP 55
+    STOP
+    EOF
 
 # run your KV store testcase 3 client
-test3 server="127.0.0.1:3777":
+test3 server="127.0.0.1:50051":
     # FIXME: your testcase 3 client run command here
 
 # run your KV store testcase 4 client(s)
-test4 server="127.0.0.1:3777":
+test4 server="127.0.0.1:50051":
     # FIXME: your testcase 4 client(s) run commands here
     #        for multi-client testcases, this recipe should run multiple
     #        concurrent client processes; you may write an additional runner
     #        utility or a scripting layer to manage multiple processes
 
 # run your KV store testcase 5 client(s)
-test5 server="127.0.0.1:3777":
+test5 server="127.0.0.1:50051":
     # FIXME: your testcase 5 client(s) run commands here
 
 # kill all processes of your KV store system
@@ -93,7 +119,7 @@ python_run := if `which uv || true` != "" { "uv run" } else { "python3" }
 tmpdir_prefix := "/tmp/madkv-p1"
 
 # launch a long-running KV store service
-service listen="0.0.0.0:3777":
+service listen="0.0.0.0:50051":
     just p1::build
     just utils::build
     cargo run -p runner -r --bin service -- \
@@ -105,14 +131,14 @@ tmpdir subdir:
     mkdir -p "{{tmpdir_prefix}}/{{subdir}}"
 
 # run a student-provided testcase
-testcase num server="127.0.0.1:3777": (tmpdir "tests")
+testcase num server="127.0.0.1:50051": (tmpdir "tests")
     just p1::build
     just "p1::test{{num}}" "{{server}}" \
         | tee "{{tmpdir_prefix}}/tests/test{{num}}.log"
     just p1::kill
 
 # run a fuzz testing scenario
-fuzz nclis conflict="no" server="127.0.0.1:3777": (tmpdir "fuzz")
+fuzz nclis conflict="no" server="127.0.0.1:50051": (tmpdir "fuzz")
     just p1::build
     just utils::build
     cargo run -p runner -r --bin fuzzer -- \
@@ -123,7 +149,7 @@ fuzz nclis conflict="no" server="127.0.0.1:3777": (tmpdir "fuzz")
     just p1::kill
 
 # run a YCSB benchmark workload
-bench nclis wload server="127.0.0.1:3777": (tmpdir "bench")
+bench nclis wload server="127.0.0.1:50051": (tmpdir "bench")
     just p1::build
     just utils::build
     just utils::ycsb

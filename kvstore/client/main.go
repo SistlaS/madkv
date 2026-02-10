@@ -252,6 +252,11 @@ func stdinMode(c kvpb.KVSClient, timeout time.Duration) {
 			fmt.Println("SCAN END")
 
 		case "STOP":
+			if len(parts) != 1 {
+				log.Printf("STOP takes no arguments")
+				cancel()
+				continue
+			}
 			cancel()
 			return
 
