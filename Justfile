@@ -32,7 +32,7 @@ fetch remote path:
 mod ping 'ping.just'
 
 # # project 1 recipes
-# mod p1 'justmod/proj1.just'
+mod p1 'justmod/proj1.just'
 
 # # project 2 recipes
 # mod p2 'justmod/proj2.just'

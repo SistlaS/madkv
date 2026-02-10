@@ -6,7 +6,16 @@ default:
 
 deps:
     #!/usr/bin/env bash
+    set -euo pipefail
     cd kvstore
+    export PATH="$(go env GOPATH)/bin:$PATH"
+    if ! command -v protoc >/dev/null 2>&1; then
+        echo "protoc not found; please install Protocol Buffers (protoc) first."
+        exit 1
+    fi
+    # Install protobuf plugins for Go
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
     # Initialize go module if not exists
     if [ ! -f go.mod ]; then
         go mod init madkv/kvstore
@@ -15,10 +24,10 @@ deps:
     go get google.golang.org/grpc
     go get google.golang.org/protobuf
     go get github.com/google/btree
-    # Generate protobuf code
+    # Generate protobuf code into gen/kvpb (module-aware output)
     mkdir -p gen/kvpb
-    protoc --go_out=gen --go_opt=paths=source_relative \
-           --go-grpc_out=gen --go-grpc_opt=paths=source_relative \
+    protoc --go_out=. --go_opt=module=madkv/kvstore \
+           --go-grpc_out=. --go-grpc_opt=module=madkv/kvstore \
            proto/kvstore.proto
     # Tidy up dependencies
     go mod tidy
@@ -42,7 +51,7 @@ server listen_addr="127.0.0.1:50051":
 
 # run you KV store client in stdin/out interface mode
 client server="127.0.0.1:3777":
-    # FIXME: your client run command here, connecting to server at addr
+    cd kvstore && ./bin/client --server {{server}}
 
 # run your KV store testcase 1 client
 test1 server="127.0.0.1:3777":
@@ -71,13 +80,10 @@ test5 server="127.0.0.1:3777":
 
 # kill all processes of your KV store system
 kill:
-    # FIXME: your kill commands here
-    #        make sure that it kills all server, clients, and any extra helper
-    #        processes of your system; redirecting both out & err to /dev/null
-    #        is recommended
-    #   TIP: commands such as 'pkill' may return non-zero exit code on success,
-    #        which would by default abort the 'just' recipe early; prepend the
-    #        command with a '-' sign to ignore its exit code
+    -pkill -f "kvstore/bin/server" 2>/dev/null
+    -pkill -f "kvstore/bin/client" 2>/dev/null
+    -pkill -f "bin/server" 2>/dev/null
+    -pkill -f "bin/client" 2>/dev/null
 
 # NOTE: feel free to add more recipes as you see fit...
 #       also feel free to add extra parameters to the recipes as you see fit,
